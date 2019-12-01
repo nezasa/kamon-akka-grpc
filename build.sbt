@@ -48,4 +48,8 @@ lazy val kamonAkkaHttp25 = Project("kamon-akka-grpc", file("kamon-akka-grpc"))
     libraryDependencies ++=
       compileScope(kamonCore, kamonAkkaHttp, kamonCommon) ++
       providedScope(kanelaAgent, http25, http2Support, stream25) ++
-      testScope(scalatest, slf4jApi, slf4jnop, kamonTestKit))
+      testScope(scalatest, slf4jApi, slf4jnop, kamonTestKit),
+    bintrayOrganization := Some("nezasadev"),
+    bintrayRepository := _root_.bintray.Bintray.defaultMavenRepository
+  
+  )
