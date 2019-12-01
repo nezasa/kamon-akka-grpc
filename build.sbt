@@ -43,7 +43,7 @@ lazy val kamonAkkaHttp25 = Project("kamon-akka-grpc", file("kamon-akka-grpc"))
     name := "kamon-akka-grpc",
     moduleName := "kamon-akka-grpc",
     bintrayPackage := "kamon-akka-grpc",
-    crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0")),
+    crossScalaVersions := Seq("2.12.8", "2.13.0")),
     javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "test",
     libraryDependencies ++=
       compileScope(kamonCore, kamonAkkaHttp, kamonCommon) ++
