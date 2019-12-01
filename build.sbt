@@ -1,20 +1,25 @@
-/*
- * =========================================================================================
- * Copyright © 2013-2017 the kamon project <http://kamon.io/>
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. See the License for the specific language governing permissions
- * and limitations under the License.
- * =========================================================================================
- */
+ThisBuild / organization     := "com.github.nezasa"
+ThisBuild / organizationName := "nezasa"
+ThisBuild / organizationHomepage := Some(url("https://github.com/nezasa/"))
 
-resolvers += Resolver.mavenLocal
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/nezasa/kamon-akka-grpc/"),
+    "scm:git@github.com:nezasa/kamon-akka-grpc.git"
+  )
+)
+ThisBuild / developers := List(
+  Developer(
+    id    = "nezasadev",
+    name  = "Nezasa Devs",
+    email = "dev@nezasa.com",
+    url   = url("http://nezasa.com")
+  )
+)
+
+
+ThisBuild / homepage := Some(url("https://github.com/nezasa/kamon-akka-grpc"))
+ThisBuild / licenses += ("Apache-2.0", url("https://opensource.org/licenses/Apache-2.0"))
 
 
 val kamonCore           = "io.kamon" %% "kamon-core"                    % "2.0.0"
