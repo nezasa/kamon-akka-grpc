@@ -14,7 +14,7 @@
  * =========================================================================================
  */
 
-package kamon.instrumentation.akka.grpc
+package akka.grpc.instrumentation
 
 import akka.stream.scaladsl.{Sink, Source}
 import kamon.Kamon
