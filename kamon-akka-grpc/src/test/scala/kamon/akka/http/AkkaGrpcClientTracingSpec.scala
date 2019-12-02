@@ -20,15 +20,16 @@ import akka.actor.ActorSystem
 import akka.grpc.GrpcClientSettings
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
-import example.myapp.helloworld.grpc.{GreeterServiceClient, HelloRequest}
+import example.myapp.helloworld.grpc.{GreeterServiceClient, HeadersRequest, HelloRequest}
 import kamon.tag.Lookups.plain
 import kamon.testkit._
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.{BeforeAndAfterAll, Matchers, OptionValues, WordSpecLike}
 
+import scala.collection.immutable
 import scala.concurrent.duration._
 
-class AkkaHttpClientTracingSpec extends WordSpecLike with Matchers with BeforeAndAfterAll with MetricInspection.Syntax
+class AkkaGrpcClientTracingSpec extends WordSpecLike with Matchers with BeforeAndAfterAll with MetricInspection.Syntax
     with Reconfigure with TestWebServer with Eventually with OptionValues with ScalaFutures with TestSpanReporter {
 
   implicit private val system = ActorSystem("http-client-instrumentation-spec")
@@ -70,7 +71,7 @@ class AkkaHttpClientTracingSpec extends WordSpecLike with Matchers with BeforeAn
     "create a client Span for Source reply" in {
       GreeterServiceClient(GrpcClientSettings.connectToServiceAt(interface, port).withTls(false))
         .itKeepsReplying(HelloRequest("joao")).runWith(Sink.seq)
-      
+
       eventually(timeout(10 seconds)) {
         val span = testSpanReporter.nextSpan().value
         span.operationName shouldBe "helloworld.GreeterService/ItKeepsReplying"
@@ -145,30 +146,37 @@ class AkkaHttpClientTracingSpec extends WordSpecLike with Matchers with BeforeAn
       testSpanReporter.nextSpan() shouldBe empty
     }
 
-//    "serialize the current context into HTTP Headers" in {
-//      val target = s"http://$interface:$port/$replyWithHeaders"
-//      val tagKey = "custom.message"
-//      val tagValue = "Hello World :D"
-//
-//      val response = Kamon.runWithContextTag(tagKey, tagValue) {
-//        Http().singleRequest(HttpRequest(uri = target, headers = List(RawHeader("X-Foo", "bar"))))
-//      }.flatMap(r => r.entity.toStrict(timeoutTest))
-//
-//      eventually(timeout(10 seconds)) {
-//        val httpResponse = response.value.value.get
-//        val headersMap = parse(httpResponse.data.utf8String).extract[Map[String, String]]
-//
-//        headersMap.keys.toList should contain allOf(
-//          "context-tags",
-//          "X-Foo",
-//          "X-B3-TraceId",
-//          "X-B3-SpanId",
-//          "X-B3-Sampled"
-//        )
-//
-//        headersMap.get("context-tags").value shouldBe "custom.message=Hello World :D;upstream.name=kamon-application;"
-//      }
-//    }
+    "serialize the current context into Headers" in {
+      val response = GreeterServiceClient(GrpcClientSettings.connectToServiceAt(interface, port).withTls(false))
+        .replyWithHeaders().addHeader("X-Foo", "bar").invoke(HeadersRequest())
+
+      eventually(timeout(10 seconds)) {
+        val httpResponse = response.value.value.get
+
+        httpResponse.headers.keys.toList should contain allOf(
+          "x-foo",
+          "x-b3-traceid",
+          "x-b3-spanid",
+          "x-b3-sampled"
+        )
+      }
+    }
+
+    "serialize the current context into Headers for Source reply" in {
+      val response = GreeterServiceClient(GrpcClientSettings.connectToServiceAt(interface, port).withTls(false))
+        .replyWithHeadersStream().addHeader("X-Foo", "bar").invoke(HeadersRequest()).runWith(Sink.seq)
+
+      eventually(timeout(10 seconds)) {
+        val httpResponse: Map[String, String] = response.value.value.get.map(_.headers).foldLeft(Map.empty[String, String])(_.++(_))
+
+        httpResponse.keys.toList should contain allOf(
+          "x-foo",
+          "x-b3-traceid",
+          "x-b3-spanid",
+          "x-b3-sampled"
+        )
+      }
+    }
 //
 //    "mark Spans as errors if the client request failed" in {
 //      val target = s"http://$interface:$port/$dummyPathError"

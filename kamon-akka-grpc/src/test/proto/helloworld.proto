@@ -31,6 +31,10 @@ service GreeterService {
      * on several lines
      * with non-empty heading/trailing line */
     rpc StreamHellos (stream HelloRequest) returns (stream HelloReply) {}
+
+    rpc ReplyWithHeaders (HeadersRequest) returns (HeadersReply) {}
+    
+    rpc ReplyWithHeadersStream (HeadersRequest) returns (stream HeadersReply) {}
 }
 //#services
 
@@ -43,5 +47,13 @@ message HelloRequest {
 // The response message containing the greetings
 message HelloReply {
     string message = 1;
+}
+
+message HeadersRequest {
+    
+}
+
+message HeadersReply {
+    map<string, string> headers = 1;
 }
 //#messages

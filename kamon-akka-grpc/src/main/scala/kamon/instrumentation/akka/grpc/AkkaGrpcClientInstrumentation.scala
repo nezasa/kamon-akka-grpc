@@ -17,7 +17,8 @@
 package kamon.instrumentation.akka.grpc
 
 import akka.stream.scaladsl.{Sink, Source}
-import kamon.instrumentation.akka.http.{ScalaServerStreamingRequestBuilderAdvice, ScalaUnaryRequestBuilderAdvice}
+import kamon.Kamon
+import kamon.instrumentation.http.HttpClientInstrumentation
 import kamon.trace.Span
 import kamon.util.CallingThreadExecutionContext
 import kanela.agent.api.instrumentation.InstrumentationBuilder
@@ -46,6 +47,16 @@ class AkkaGrpcClientInstrumentation extends InstrumentationBuilder {
 }
 
 object AkkaGrpcClientInstrumentation {
+
+  Kamon.onReconfigure(_ => rebuildHttpClientInstrumentation(): Unit)
+
+  @volatile private[grpc] var _httpClientInstrumentation: HttpClientInstrumentation = rebuildHttpClientInstrumentation
+
+  private[grpc] def rebuildHttpClientInstrumentation(): HttpClientInstrumentation = {
+    val httpClientConfig = Kamon.config().getConfig("kamon.instrumentation.akka.grpc.client")
+    _httpClientInstrumentation = HttpClientInstrumentation.from(httpClientConfig, "akka-grpc")
+    _httpClientInstrumentation
+  }
 
   def handleResponse(response: Future[_], span: Span): Future[_] = {
 
