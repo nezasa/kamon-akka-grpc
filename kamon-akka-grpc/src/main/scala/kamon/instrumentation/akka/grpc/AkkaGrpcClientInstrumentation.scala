@@ -31,9 +31,10 @@ class AkkaGrpcClientInstrumentation extends InstrumentationBuilder {
 
   onSubTypesOf("akka.grpc.internal.ScalaUnaryRequestBuilder")
     .advise(method("invoke").and(ElementMatchers.isPrivate[MethodDescription]), classOf[ScalaUnaryRequestBuilderAdvice])
+    .advise(method("invokeWithMetadata").and(ElementMatchers.isPrivate[MethodDescription]), classOf[ScalaUnaryRequestBuilderAdvice])
 
   onSubTypesOf("akka.grpc.internal.ScalaServerStreamingRequestBuilder")
-    .advise(method("invoke"), classOf[ScalaServerStreamingRequestBuilderAdvice])
+    .advise(method("invokeWithMetadata").and(ElementMatchers.isPublic[MethodDescription]), classOf[ScalaServerStreamingRequestBuilderAdvice])
   
   onSubTypesOf("akka.grpc.internal.ScalaClientStreamingRequestBuilder")
     .advise(method("invokeWithMetadata").and(ElementMatchers.isPublic[MethodDescription]), classOf[ScalaUnaryRequestBuilderAdvice])

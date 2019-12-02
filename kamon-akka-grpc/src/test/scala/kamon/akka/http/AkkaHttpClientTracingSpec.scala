@@ -40,7 +40,7 @@ class AkkaHttpClientTracingSpec extends WordSpecLike with Matchers with BeforeAn
   val port = 8080
   val webServer = startServer(interface, port)
 
-  "the Akka HTTP client instrumentation" should {
+  "the Akka GRPC client instrumentation" should {
     "create a client Span" in {
       GreeterServiceClient(GrpcClientSettings.connectToServiceAt(interface, port).withTls(false))
         .sayHello(HelloRequest())
@@ -51,6 +51,20 @@ class AkkaHttpClientTracingSpec extends WordSpecLike with Matchers with BeforeAn
         //span.tags.get(plain("http.url")) shouldBe target
         span.metricTags.get(plain("component")) shouldBe "akka-grpc"
       }
+      testSpanReporter.nextSpan() shouldBe empty
+    }
+
+    "create a client Span with Metadata" in {
+      GreeterServiceClient(GrpcClientSettings.connectToServiceAt(interface, port).withTls(false))
+        .sayHello().addHeader("X","Y").invokeWithMetadata(HelloRequest())
+
+      eventually(timeout(10 seconds)) {
+        val span = testSpanReporter.nextSpan().value
+        span.operationName shouldBe "helloworld.GreeterService/SayHello"
+        //span.tags.get(plain("http.url")) shouldBe target
+        span.metricTags.get(plain("component")) shouldBe "akka-grpc"
+      }
+      testSpanReporter.nextSpan() shouldBe empty
     }
 
     "create a client Span for Source reply" in {
@@ -63,6 +77,20 @@ class AkkaHttpClientTracingSpec extends WordSpecLike with Matchers with BeforeAn
         //span.tags.get(plain("http.url")) shouldBe target
         span.metricTags.get(plain("component")) shouldBe "akka-grpc"
       }
+      testSpanReporter.nextSpan() shouldBe empty
+    }
+
+    "create a client Span for Source reply with Metadata" in {
+      GreeterServiceClient(GrpcClientSettings.connectToServiceAt(interface, port).withTls(false))
+        .itKeepsReplying().addHeader("X","Y").invokeWithMetadata(HelloRequest("joao")).runWith(Sink.seq)
+      
+      eventually(timeout(10 seconds)) {
+        val span = testSpanReporter.nextSpan().value
+        span.operationName shouldBe "helloworld.GreeterService/ItKeepsReplying"
+        //span.tags.get(plain("http.url")) shouldBe target
+        span.metricTags.get(plain("component")) shouldBe "akka-grpc"
+      }
+      testSpanReporter.nextSpan() shouldBe empty
     }
 
     "create a client Span for Source request" in {
@@ -75,6 +103,20 @@ class AkkaHttpClientTracingSpec extends WordSpecLike with Matchers with BeforeAn
         //span.tags.get(plain("http.url")) shouldBe target
         span.metricTags.get(plain("component")) shouldBe "akka-grpc"
       }
+      testSpanReporter.nextSpan() shouldBe empty
+    }
+
+    "create a client Span for Source request with Metadata" in {
+      GreeterServiceClient(GrpcClientSettings.connectToServiceAt(interface, port).withTls(false))
+        .itKeepsTalking().addHeader("X","Y").invokeWithMetadata(Source("joao".map(c => HelloRequest(c.toString))))
+
+      eventually(timeout(10 seconds)) {
+        val span = testSpanReporter.nextSpan().value
+        span.operationName shouldBe "helloworld.GreeterService/ItKeepsTalking"
+        //span.tags.get(plain("http.url")) shouldBe target
+        span.metricTags.get(plain("component")) shouldBe "akka-grpc"
+      }
+      testSpanReporter.nextSpan() shouldBe empty
     }
 
     "create a client Span for Source response and request" in {
@@ -87,6 +129,20 @@ class AkkaHttpClientTracingSpec extends WordSpecLike with Matchers with BeforeAn
         //span.tags.get(plain("http.url")) shouldBe target
         span.metricTags.get(plain("component")) shouldBe "akka-grpc"
       }
+      testSpanReporter.nextSpan() shouldBe empty
+    }
+
+    "create a client Span for Source response and request with Metadata" in {
+      GreeterServiceClient(GrpcClientSettings.connectToServiceAt(interface, port).withTls(false))
+        .streamHellos().addHeader("X","Y").invokeWithMetadata(Source("joao".map(c => HelloRequest(c.toString)))).runWith(Sink.seq)
+
+      eventually(timeout(10 seconds)) {
+        val span = testSpanReporter.nextSpan().value
+        span.operationName shouldBe "helloworld.GreeterService/StreamHellos"
+        //span.tags.get(plain("http.url")) shouldBe target
+        span.metricTags.get(plain("component")) shouldBe "akka-grpc"
+      }
+      testSpanReporter.nextSpan() shouldBe empty
     }
 
 //    "serialize the current context into HTTP Headers" in {
