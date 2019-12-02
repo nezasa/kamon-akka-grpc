@@ -1,25 +1,28 @@
-ThisBuild / organization     := "com.github.nezasa"
-ThisBuild / organizationName := "nezasa"
-ThisBuild / organizationHomepage := Some(url("https://github.com/nezasa/"))
+val organizationSettings = Seq(
+  organization     := "com.github.nezasa",
+  organizationName := "nezasa",
+  organizationHomepage := Some(url("https://github.com/nezasa/")),
 
-ThisBuild / scmInfo := Some(
-  ScmInfo(
-    url("https://github.com/nezasa/kamon-akka-grpc/"),
-    "scm:git@github.com:nezasa/kamon-akka-grpc.git"
-  )
+  scmInfo := Some(
+    ScmInfo(
+      url("https://github.com/nezasa/kamon-akka-grpc/"),
+      "scm:git@github.com:nezasa/kamon-akka-grpc.git"
+    ),
+  ),
+  developers := List(
+    Developer(
+      id    = "nezasadev",
+      name  = "Nezasa Devs",
+      email = "dev@nezasa.com",
+      url   = url("http://nezasa.com")
+    )
+  ),
+  homepage := Some(url("https://github.com/nezasa/kamon-akka-grpc")),
+  licenses += ("Apache-2.0", url("https://opensource.org/licenses/Apache-2.0")),
+  pomExtra := scala.xml.NodeSeq.Empty,
 )
-ThisBuild / developers := List(
-  Developer(
-    id    = "nezasadev",
-    name  = "Nezasa Devs",
-    email = "dev@nezasa.com",
-    url   = url("http://nezasa.com")
-  )
-)
 
 
-ThisBuild / homepage := Some(url("https://github.com/nezasa/kamon-akka-grpc"))
-ThisBuild / licenses += ("Apache-2.0", url("https://opensource.org/licenses/Apache-2.0"))
 
 
 val kamonCore           = "io.kamon" %% "kamon-core"                    % "2.0.0"
@@ -34,14 +37,8 @@ val stream25            = "com.typesafe.akka" %% "akka-stream"          % "2.5.2
 
 
 lazy val root = (project in file("."))
-  .settings(noPublishing: _*)
-  .settings(
-    name := "kamon-akka-grpc",
-    crossScalaVersions := Nil
-  ).aggregate(kamonAkkaHttp25)
-
-lazy val kamonAkkaHttp25 = Project("kamon-akka-grpc", file("kamon-akka-grpc"))
   .enablePlugins(JavaAgent, AkkaGrpcPlugin)
+  .settings(organizationSettings)
   .settings(instrumentationSettings)
   .settings(resolvers += Resolver.bintrayRepo("akka", "maven"))
   .settings(Seq(
@@ -52,11 +49,10 @@ lazy val kamonAkkaHttp25 = Project("kamon-akka-grpc", file("kamon-akka-grpc"))
     javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "test",
     libraryDependencies ++=
       compileScope(kamonCore, kamonAkkaHttp, kamonCommon) ++
-      providedScope(kanelaAgent, http25, http2Support, stream25) ++
-      testScope(scalatest, slf4jApi, slf4jnop, kamonTestKit),
+        providedScope(kanelaAgent, http25, http2Support, stream25) ++
+        testScope(scalatest, slf4jApi, slf4jnop, kamonTestKit),
     bintrayOrganization := Some("nezasadev"),
     bintrayRepository := _root_.bintray.Bintray.defaultMavenRepository,
 
     akkaGrpcCodeGeneratorSettings in Test += "server_power_apis",
-  
   )
