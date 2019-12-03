@@ -160,6 +160,13 @@ class AkkaGrpcClientTracingSpec extends WordSpecLike with Matchers with BeforeAn
           "x-b3-sampled"
         )
       }
+      eventually(timeout(10 seconds)) {
+        val span = testSpanReporter.nextSpan().value
+        span.operationName shouldBe "helloworld.GreeterService/ReplyWithHeaders"
+        //span.tags.get(plain("http.url")) shouldBe target
+        span.metricTags.get(plain("component")) shouldBe "akka-grpc"
+      }
+      testSpanReporter.nextSpan() shouldBe empty
     }
 
     "serialize the current context into Headers for Source reply" in {
@@ -176,6 +183,13 @@ class AkkaGrpcClientTracingSpec extends WordSpecLike with Matchers with BeforeAn
           "x-b3-sampled"
         )
       }
+      eventually(timeout(10 seconds)) {
+        val span = testSpanReporter.nextSpan().value
+        span.operationName shouldBe "helloworld.GreeterService/ReplyWithHeadersStream"
+        //span.tags.get(plain("http.url")) shouldBe target
+        span.metricTags.get(plain("component")) shouldBe "akka-grpc"
+      }
+      testSpanReporter.nextSpan() shouldBe empty
     }
 //
 //    "mark Spans as errors if the client request failed" in {
