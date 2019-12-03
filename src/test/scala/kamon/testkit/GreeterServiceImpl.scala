@@ -53,4 +53,9 @@ class GreeterServiceImpl(implicit mat: Materializer) extends GreeterServicePower
       HeadersReply(Map(k -> value))
     }
   )
+
+  override def waite(in: HelloRequest, metadata: Metadata): Future[HelloReply] = Future {
+    Thread.sleep(1000)
+    HelloReply()
+  }
 }

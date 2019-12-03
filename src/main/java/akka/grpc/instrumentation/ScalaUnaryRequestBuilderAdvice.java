@@ -41,6 +41,6 @@ public class ScalaUnaryRequestBuilderAdvice {
                               @Advice.Local("handler") HttpClientInstrumentation.RequestHandler<MetadataImpl> handler) {
 
         headers = oldHeaders;
-        handler.processResponse(RequestBuilder.toResponse());
+        AkkaGrpcClientInstrumentation.handleResponse(response, handler);
     }
 }

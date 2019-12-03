@@ -35,6 +35,8 @@ service GreeterService {
     rpc ReplyWithHeaders (HeadersRequest) returns (HeadersReply) {}
     
     rpc ReplyWithHeadersStream (HeadersRequest) returns (stream HeadersReply) {}
+    
+    rpc Waite (HelloRequest) returns (HelloReply) {}
 }
 //#services
 

@@ -55,6 +55,22 @@ class AkkaGrpcClientTracingSpec extends WordSpecLike with Matchers with BeforeAn
       testSpanReporter.nextSpan() shouldBe empty
     }
 
+    "create a client Span with proper duration" in {
+      GreeterServiceClient(GrpcClientSettings.connectToServiceAt(interface, port).withTls(false))
+        .waite(HelloRequest())
+
+      eventually(timeout(10 seconds)) {
+        val span = testSpanReporter.nextSpan().value
+        span.operationName shouldBe "helloworld.GreeterService/Waite"
+        val duration = java.time.Duration.between(span.from, span.to).toMillis
+        println(duration)
+        duration shouldBe >= (1000L)
+        //span.tags.get(plain("http.url")) shouldBe target
+        span.metricTags.get(plain("component")) shouldBe "akka-grpc"
+      }
+      testSpanReporter.nextSpan() shouldBe empty
+    }
+
     "create a client Span with Metadata" in {
       GreeterServiceClient(GrpcClientSettings.connectToServiceAt(interface, port).withTls(false))
         .sayHello().addHeader("X","Y").invokeWithMetadata(HelloRequest())

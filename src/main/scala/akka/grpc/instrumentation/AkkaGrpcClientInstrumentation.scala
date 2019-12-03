@@ -16,10 +16,10 @@
 
 package akka.grpc.instrumentation
 
+import akka.grpc.internal.MetadataImpl
 import akka.stream.scaladsl.{Sink, Source}
 import kamon.Kamon
 import kamon.instrumentation.http.HttpClientInstrumentation
-import kamon.trace.Span
 import kamon.util.CallingThreadExecutionContext
 import kanela.agent.api.instrumentation.InstrumentationBuilder
 import kanela.agent.libs.net.bytebuddy.description.method.MethodDescription
@@ -58,26 +58,16 @@ object AkkaGrpcClientInstrumentation {
     _httpClientInstrumentation
   }
 
-  def handleResponse(response: Future[_], span: Span): Future[_] = {
-
-    response.transform(
-      s = response => {
-        span.finish()
-        response
-      },
-      f = error => {
-        span.fail(error).finish()
-        error
-      }
-    )(CallingThreadExecutionContext)
+  def handleResponse(response: Future[_], handler: HttpClientInstrumentation.RequestHandler[MetadataImpl]): Unit = {
+    response.onComplete {
+      case Success(_) => handler.processResponse(RequestBuilder.toResponse(/*response*/))
+      case Failure(t) => handler.span.fail(t).finish()
+    }(CallingThreadExecutionContext)
   }
-  def handleResponse[A, B](response: Source[A, B], span: Span): Source[A, B] = {
+  def handleResponse[A, B](response: Source[A, B], handler: HttpClientInstrumentation.RequestHandler[MetadataImpl]): Source[A, B] = {
     val sink = Sink.onComplete {
-      case Failure(error) => 
-        error.printStackTrace()
-        span.fail(error).finish()
-      case Success(_) =>
-        span.finish()
+      case Success(_) => handler.processResponse(RequestBuilder.toResponse(/*response*/))
+      case Failure(t) => handler.span.fail(t).finish()
     }
     response.wireTap(sink)
   }

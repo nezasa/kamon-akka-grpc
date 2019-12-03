@@ -47,6 +47,6 @@ public class ScalaServerStreamingRequestBuilderAdvice {
                               @Advice.Local("handler") HttpClientInstrumentation.RequestHandler<MetadataImpl> handler) {
 
         headers = oldHeaders;
-        response = AkkaGrpcClientInstrumentation.handleResponse(response, span);
+        response = AkkaGrpcClientInstrumentation.handleResponse(response, handler);
     }
 }
