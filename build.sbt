@@ -35,6 +35,7 @@ val http25              = "com.typesafe.akka" %% "akka-http"            % "10.1.
 val http2Support        = "com.typesafe.akka" %% "akka-http2-support"   % "10.1.10"
 val stream25            = "com.typesafe.akka" %% "akka-stream"          % "2.5.24"
 val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "0.7.2" 
+val grpcStub           = "io.grpc" % "grpc-stub" % "1.24.0" 
 
 
 lazy val root = (project in file("."))
@@ -49,8 +50,9 @@ lazy val root = (project in file("."))
     crossScalaVersions := Seq("2.12.8", "2.13.0")),
     javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "test",
     libraryDependencies := libraryDependencies.value.filterNot(m => m.organization == "com.lightbend.akka.grpc" && m.name.startsWith("akka-grpc-runtime")),
+    libraryDependencies := libraryDependencies.value.filterNot(m => m.organization == "io.grpc" && m.name.startsWith("grpc-stub")),
     libraryDependencies ++=
-      compileScope(akkaGrpcRuntime) ++ //remove when we use a published version of sbt-akka-grpc
+      providedScope(akkaGrpcRuntime, grpcStub) ++ //remove when we use a published version of sbt-akka-grpc
       compileScope(kamonCore, kamonAkkaHttp, kamonCommon) ++
         providedScope(kanelaAgent, http25, http2Support, stream25) ++
         testScope(scalatest, slf4jApi, slf4jnop, kamonTestKit),
