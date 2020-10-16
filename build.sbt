@@ -34,7 +34,7 @@ val kanelaAgent         = "io.kamon" %  "kanela-agent"                  % "1.0.1
 val http25              = "com.typesafe.akka" %% "akka-http"            % "10.1.10"
 val http2Support        = "com.typesafe.akka" %% "akka-http2-support"   % "10.1.10"
 val stream25            = "com.typesafe.akka" %% "akka-stream"          % "2.5.24"
-val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "0.7.3"
+val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "0.8.4"
 val grpcStub           = "io.grpc" % "grpc-stub" % "1.24.0" 
 
 
