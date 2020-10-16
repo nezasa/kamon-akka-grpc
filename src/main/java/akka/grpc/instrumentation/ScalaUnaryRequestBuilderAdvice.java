@@ -40,7 +40,7 @@ public class ScalaUnaryRequestBuilderAdvice {
                               @Advice.Local("span") Span span,
                               @Advice.Local("handler") HttpClientInstrumentation.RequestHandler<MetadataImpl> handler) {
 
-        headers = oldHeaders;
+        //headers = oldHeaders;
         AkkaGrpcClientInstrumentation.handleResponse(response, handler);
     }
 }

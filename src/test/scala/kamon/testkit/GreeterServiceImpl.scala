@@ -36,6 +36,7 @@ class GreeterServiceImpl(implicit mat: Materializer) extends GreeterServicePower
   }
 
   override def replyWithHeaders(in: HeadersRequest, metadata: Metadata): Future[HeadersReply] = {
+    println(metadata.asMap)
     Future.successful(HeadersReply(metadata.asMap.mapValues { x =>
       x.head match {
         case StringEntry(value) => value
@@ -44,15 +45,16 @@ class GreeterServiceImpl(implicit mat: Materializer) extends GreeterServicePower
     }.toMap))
   }
 
-  override def replyWithHeadersStream(in: HeadersRequest, metadata: Metadata): Source[HeadersReply, NotUsed] = Source(
-    metadata.asMap.map { case (k,v) =>
+  override def replyWithHeadersStream(in: HeadersRequest, metadata: Metadata): Source[HeadersReply, NotUsed] = Source({
+    println(metadata.asMap)
+    metadata.asMap.map { case (k, v) =>
       val value = v.head match {
         case StringEntry(value) => value
         case BytesEntry(value) => value.utf8String
       }
       HeadersReply(Map(k -> value))
     }
-  )
+  })
 
   override def waite(in: HelloRequest, metadata: Metadata): Future[HelloReply] = Future {
     Thread.sleep(1000)
