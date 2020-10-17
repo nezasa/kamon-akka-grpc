@@ -20,7 +20,8 @@ public class ScalaServerStreamingRequestBuilderAdvice {
     public static void onEnter(@Advice.FieldValue("descriptor") MethodDescriptor<?, ?> descriptor,
                                @Advice.FieldValue("settings") GrpcClientSettings settings,
                                @Advice.FieldValue(value = "headers", readOnly = false) MetadataImpl headers,
-                               @Advice.FieldValue(value = "defaultFlow", readOnly = false) Future<OptionVal<Flow<?, ?, Future<GrpcResponseMetadata>>>> defaultFlow,
+                               //defaultFlow is an OptionalVal<Flow<>>, but OptionalVal is an AnyVal, so it effectively is an Flow<>
+                               @Advice.FieldValue(value = "defaultFlow", readOnly = false) Flow<?, ?, Future<GrpcResponseMetadata>> defaultFlow,
                                @Advice.Local("oldHeaders") MetadataImpl oldHeaders,
                                @Advice.Local("span") Span span,
                                @Advice.Local("handler") HttpClientInstrumentation.RequestHandler<MetadataImpl> handler) {
@@ -32,7 +33,9 @@ public class ScalaServerStreamingRequestBuilderAdvice {
 
         headers = handler.request();
 
-        defaultFlow = akka.grpc.instrumentation.RequestBuilder.noneFlow(defaultFlow);  //Very ugly hack so that headers that I set above are included in the flow :(
+        //Very ugly hack so that headers that I set above are included in the flow :(
+        //Also null is how OptionalVal.none is encoded
+        defaultFlow = null;
 
         span = handler.span();
 

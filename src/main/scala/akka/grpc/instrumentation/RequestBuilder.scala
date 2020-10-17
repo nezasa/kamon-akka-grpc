@@ -1,7 +1,8 @@
 package akka.grpc.instrumentation
 
-import akka.grpc.GrpcClientSettings
+import akka.grpc.{GrpcClientSettings, GrpcResponseMetadata}
 import akka.grpc.internal.MetadataImpl
+import akka.stream.scaladsl.Flow
 import akka.util.OptionVal
 import io.grpc.MethodDescriptor
 import kamon.instrumentation.http.HttpMessage
@@ -59,7 +60,4 @@ object RequestBuilder {
     }
   }
   
-  def noneFlow[T](defaultFlow: Future[OptionVal[T]]): Future[OptionVal[T]] = {
-    Future.successful(OptionVal.none)
-  };
 }
