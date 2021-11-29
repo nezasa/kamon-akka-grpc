@@ -20,22 +20,13 @@ public class ScalaServerStreamingRequestBuilderAdvice {
     public static void onEnter(@Advice.FieldValue("descriptor") MethodDescriptor<?, ?> descriptor,
                                @Advice.FieldValue("settings") GrpcClientSettings settings,
                                @Advice.FieldValue(value = "headers", readOnly = false) MetadataImpl headers,
-                               //defaultFlow is an OptionalVal<Flow<>>, but OptionalVal is an AnyVal, so it effectively is an Flow<>
-                               @Advice.FieldValue(value = "defaultFlow", readOnly = false) Flow<?, ?, Future<GrpcResponseMetadata>> defaultFlow,
-                               @Advice.Local("oldHeaders") MetadataImpl oldHeaders,
                                @Advice.Local("span") Span span,
                                @Advice.Local("handler") HttpClientInstrumentation.RequestHandler<MetadataImpl> handler) {
         
         HttpMessage.RequestBuilder<MetadataImpl> requestBuilder = akka.grpc.instrumentation.RequestBuilder.toRequestBuilder(descriptor, headers, settings);
         handler = AkkaGrpcClientInstrumentation$.MODULE$._httpClientInstrumentation().createHandler(requestBuilder, Kamon.currentContext());
 
-        oldHeaders = headers;
-
         headers = handler.request();
-
-        //Very ugly hack so that headers that I set above are included in the flow :(
-        //Also null is how OptionalVal.none is encoded
-        defaultFlow = null;
 
         span = handler.span();
 
@@ -44,12 +35,8 @@ public class ScalaServerStreamingRequestBuilderAdvice {
 
     @Advice.OnMethodExit
     public static void onExit(@Advice.Return(readOnly = false) Source<?, ?> response,
-                              @Advice.FieldValue(value = "headers", readOnly = false) MetadataImpl headers,
-                              @Advice.Local("oldHeaders") MetadataImpl oldHeaders,
-                              @Advice.Local("span") Span span,
                               @Advice.Local("handler") HttpClientInstrumentation.RequestHandler<MetadataImpl> handler) {
 
-        //headers = oldHeaders;
         response = AkkaGrpcClientInstrumentation.handleResponse(response, handler);
     }
 }

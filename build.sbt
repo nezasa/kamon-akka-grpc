@@ -25,16 +25,15 @@ val organizationSettings = Seq(
 
 
 
-val kamonCore           = "io.kamon" %% "kamon-core"                    % "2.0.0"
-val kamonTestKit        = "io.kamon" %% "kamon-testkit"                 % "2.0.2"
+val kamonTestKit        = "io.kamon" %% "kamon-testkit"                 % "2.1.12"
 val kamonCommon         = "io.kamon" %% "kamon-instrumentation-common"  % "2.0.0"
-val kamonAkkaHttp       = "io.kamon" %% "kamon-akka-http"               % "2.0.0"
+val kamonAkkaHttp       = "io.kamon" %% "kamon-akka-http"               % "2.1.12"
 val kanelaAgent         = "io.kamon" %  "kanela-agent"                  % "1.0.1"
 
 val http25              = "com.typesafe.akka" %% "akka-http"            % "10.1.10"
 val http2Support        = "com.typesafe.akka" %% "akka-http2-support"   % "10.1.10"
 val stream25            = "com.typesafe.akka" %% "akka-stream"          % "2.5.24"
-val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "1.0.2"
+val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "2.0.0"
 
 
 lazy val root = (project in file("."))
@@ -47,7 +46,7 @@ lazy val root = (project in file("."))
     crossScalaVersions := Seq("2.12.8", "2.13.0"),
     libraryDependencies ++=
       providedScope(akkaGrpcRuntime) ++
-      compileScope(kamonCore, kamonAkkaHttp, kamonCommon) ++
+      compileScope(kamonAkkaHttp) ++
         providedScope(kanelaAgent, http25, http2Support, stream25),
     bintrayOrganization := Some("nezasadev"),
     bintrayRepository := _root_.bintray.Bintray.defaultMavenRepository,
