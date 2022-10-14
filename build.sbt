@@ -38,21 +38,19 @@ val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "2.
 
 lazy val root = (project in file("."))
   .settings(organizationSettings)
-  .settings(resolvers += Resolver.bintrayRepo("akka", "maven"))
   .settings(
     name := "kamon-akka-grpc",
     moduleName := "kamon-akka-grpc",
-    bintrayPackage := "kamon-akka-grpc",
     crossScalaVersions := Seq("2.12.17", "2.13.10"),
     libraryDependencies ++=
       providedScope(akkaGrpcRuntime) ++
       compileScope(kamonAkkaHttp) ++
         providedScope(kanelaAgent, http25, http2Support, stream25),
-    bintrayOrganization := Some("nezasadev"),
-    bintrayRepository := _root_.bintray.Bintray.defaultMavenRepository,
-
-
+    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+    releaseCrossBuild := true,
   )
+
+// See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
 
 lazy val e2eTest = (project in file("e2eTest"))
   .enablePlugins(JavaAgent, AkkaGrpcPlugin)

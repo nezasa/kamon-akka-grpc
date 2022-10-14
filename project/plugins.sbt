@@ -2,4 +2,4 @@ lazy val root = project in file(".") dependsOn(RootProject(uri("https://github.c
 
 addSbtPlugin("com.lightbend.akka.grpc" % "sbt-akka-grpc" % "2.1.6")
 
-resolvers += Resolver.bintrayRepo("akka", "maven")
+addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2")
