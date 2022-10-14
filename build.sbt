@@ -25,39 +25,42 @@ val organizationSettings = Seq(
 
 
 
-val kamonCore           = "io.kamon" %% "kamon-core"                    % "2.0.0"
-val kamonTestKit        = "io.kamon" %% "kamon-testkit"                 % "2.0.2"
+val kamonTestKit        = "io.kamon" %% "kamon-testkit"                 % "2.1.12"
 val kamonCommon         = "io.kamon" %% "kamon-instrumentation-common"  % "2.0.0"
-val kamonAkkaHttp       = "io.kamon" %% "kamon-akka-http"               % "2.0.0"
+val kamonAkkaHttp       = "io.kamon" %% "kamon-akka-http"               % "2.1.12"
 val kanelaAgent         = "io.kamon" %  "kanela-agent"                  % "1.0.1"
 
 val http25              = "com.typesafe.akka" %% "akka-http"            % "10.1.10"
 val http2Support        = "com.typesafe.akka" %% "akka-http2-support"   % "10.1.10"
 val stream25            = "com.typesafe.akka" %% "akka-stream"          % "2.5.24"
-val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "1.0.2"
-val grpcStub           = "io.grpc" % "grpc-stub" % "1.24.0" 
+val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "2.0.0"
 
 
 lazy val root = (project in file("."))
-  .enablePlugins(JavaAgent, AkkaGrpcPlugin)
   .settings(organizationSettings)
-  .settings(instrumentationSettings)
   .settings(resolvers += Resolver.bintrayRepo("akka", "maven"))
-  .settings(Seq(
+  .settings(
     name := "kamon-akka-grpc",
     moduleName := "kamon-akka-grpc",
     bintrayPackage := "kamon-akka-grpc",
-    crossScalaVersions := Seq("2.12.8", "2.13.0")),
-    javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "test",
-    libraryDependencies := libraryDependencies.value.filterNot(m => m.organization == "com.lightbend.akka.grpc" && m.name.startsWith("akka-grpc-runtime")),
-    libraryDependencies := libraryDependencies.value.filterNot(m => m.organization == "io.grpc" && m.name.startsWith("grpc-stub")),
+    crossScalaVersions := Seq("2.12.8", "2.13.0"),
     libraryDependencies ++=
-      providedScope(akkaGrpcRuntime, grpcStub) ++ //remove when we use a published version of sbt-akka-grpc
-      compileScope(kamonCore, kamonAkkaHttp, kamonCommon) ++
-        providedScope(kanelaAgent, http25, http2Support, stream25) ++
-        testScope(scalatest, slf4jApi, slf4jnop, kamonTestKit),
+      providedScope(akkaGrpcRuntime) ++
+      compileScope(kamonAkkaHttp) ++
+        providedScope(kanelaAgent, http25, http2Support, stream25),
     bintrayOrganization := Some("nezasadev"),
     bintrayRepository := _root_.bintray.Bintray.defaultMavenRepository,
 
+
+  )
+
+lazy val e2eTest = (project in file("e2eTest"))
+  .enablePlugins(JavaAgent, AkkaGrpcPlugin)
+  .settings(instrumentationSettings)
+  .settings(
+    publish / skip := true,
+    crossScalaVersions := Seq("2.12.8", "2.13.0"),
+    libraryDependencies ++= testScope(scalatest, slf4jApi, slf4jnop, kamonTestKit),
     akkaGrpcCodeGeneratorSettings in Test += "server_power_apis",
   )
+  .dependsOn(root)
