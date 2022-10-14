@@ -41,6 +41,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "kamon-akka-grpc",
     moduleName := "kamon-akka-grpc",
+    versionScheme := Some("early-semver"),
     crossScalaVersions := Seq("2.12.17", "2.13.10"),
     libraryDependencies ++=
       providedScope(akkaGrpcRuntime) ++
