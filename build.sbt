@@ -33,7 +33,7 @@ val kanelaAgent         = "io.kamon" %  "kanela-agent"                  % "1.0.1
 val http25              = "com.typesafe.akka" %% "akka-http"            % "10.1.10"
 val http2Support        = "com.typesafe.akka" %% "akka-http2-support"   % "10.1.10"
 val stream25            = "com.typesafe.akka" %% "akka-stream"          % "2.5.24"
-val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "2.0.0"
+val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "2.1.6"
 
 
 lazy val root = (project in file("."))
@@ -43,7 +43,7 @@ lazy val root = (project in file("."))
     name := "kamon-akka-grpc",
     moduleName := "kamon-akka-grpc",
     bintrayPackage := "kamon-akka-grpc",
-    crossScalaVersions := Seq("2.12.8", "2.13.0"),
+    crossScalaVersions := Seq("2.12.17", "2.13.10"),
     libraryDependencies ++=
       providedScope(akkaGrpcRuntime) ++
       compileScope(kamonAkkaHttp) ++
@@ -59,8 +59,8 @@ lazy val e2eTest = (project in file("e2eTest"))
   .settings(instrumentationSettings)
   .settings(
     publish / skip := true,
-    crossScalaVersions := Seq("2.12.8", "2.13.0"),
+    crossScalaVersions := Seq("2.12.17", "2.13.10"),
     libraryDependencies ++= testScope(scalatest, slf4jApi, slf4jnop, kamonTestKit),
-    akkaGrpcCodeGeneratorSettings in Test += "server_power_apis",
+    Test / akkaGrpcCodeGeneratorSettings += "server_power_apis",
   )
   .dependsOn(root)
