@@ -22,6 +22,17 @@ val organizationSettings = Seq(
   pomExtra := scala.xml.NodeSeq.Empty,
 )
 
+ThisBuild / pomIncludeRepository := { _ => false }
+ThisBuild / publishTo := {
+  // For accounts created after Feb 2021:
+  // val nexus = "https://s01.oss.sonatype.org/"
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
+  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+ThisBuild / publishMavenStyle := true
+
+
 
 
 
