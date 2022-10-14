@@ -48,6 +48,7 @@ val akkaGrpcRuntime     = "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % "2.
 
 
 lazy val root = (project in file("."))
+  .disablePlugins(BintrayPlugin) //it is included by kamon-sbt-umbrella
   .settings(organizationSettings)
   .settings(
     name := "kamon-akka-grpc",
